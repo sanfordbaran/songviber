@@ -103,14 +103,25 @@ def get_df_filtered(df):
 
 
 def get_rank_and_title_list(df_filtered):
-    rank_and_title_list = ["Select a Row by choosing a 'Ranking -- Song Title'"]
+    rank_and_title_list = ["Select a Row by choosing a 'Ranking' -- 'Song Title'"]
     for row in df_filtered.itertuples():
         rank_and_title_list.append(f'{row.Ranking} -- {row.Title}')
     return rank_and_title_list
 
+def is_castable_to_int(s):
+    try:
+        int(s)
+        return True
+    except ValueError:
+        return False
+
 def convert_rank_title_choice_to_index(rank_title_choice):
-    rank = rank_title_choice.split(' ')[0]
-    return int(rank) - 1
+    ranking = rank_title_choice.split(' ')[0]
+    print(ranking)
+    if is_castable_to_int(ranking):
+        return int(ranking) - 1      
+    else:
+        return -1
 
 def reset_state():
     st.session_state.mood = 'All Moods'
@@ -136,7 +147,7 @@ if 'moods35' not in st.session_state:
 if 'moods4' not in st.session_state:
     st.session_state.moods4 = get_moods(df4)
 if 'rank_and_title' not in st.session_state:
-    st.session_state.rank_and_title = "Select a Row by choosing a 'Ranking -- Song Title'"
+    st.session_state.rank_and_title = "Select a Row by choosing a 'Ranking' -- 'Song Title'"
 
 # Initialize other variables
 if st.session_state.llm == 'GPT-3.5-Turbo':
@@ -235,89 +246,90 @@ with colA:
 if rank_title_choice != "Select a Row by choosing a 'Ranking' -- 'Song Title'":
     # Display Song Name, Artist, Genre and Position in List
     index = convert_rank_title_choice_to_index(rank_title_choice)
-    row = df.iloc[index]
+    if index >= 0:
+        row = df.iloc[index]
 
-    col1, col2, col3, col4 = st.columns(4)
-
-    st.text("")
-    with col1:
-        st.markdown("<h4 style='text-align: left; color: black;'>Song Name</h4>", unsafe_allow_html=True)
-        st.write(row.Title)
-
-    with col2:
-        st.markdown("<h4 style='text-align: left; color: black;'>Artist</h4>", unsafe_allow_html=True)
-        st.write(row.Artist)
-
-    with col3:
-        st.markdown("<h4 style='text-align: left; color: black;'>Genre</h4>", unsafe_allow_html=True)
-        st.write(row.Genre)
-
-    with col4:
-        st.markdown("<h4 style='text-align: left; color: black;'>Position in List</h4>", unsafe_allow_html=True)
-        st.write(row.Ranking)
-
-    if row.Lyrics == 'Song does not contain lyrics':
-        # Display this if song doesn't contain lyrics
-        st.text("")
-        st.text("")
-        st.markdown("<h4 style='text-align: left; color: black;'>Lyrics</h4>", unsafe_allow_html=True)
-        st.write(row.Lyrics)
+        col1, col2, col3, col4 = st.columns(4)
 
         st.text("")
-        st.text("")
-        st.markdown("<h4 style='text-align: left; color: black;'>No Data Available</h4>", unsafe_allow_html=True)
-    elif row.Moods == 'No Data Available...':
-        # .. or this if No Data Available
-        st.markdown("<h4 style='text-align: left; color: black;'>No Data Available</h4>", unsafe_allow_html=True)
-    else:
-        # Lyrics
-        st.text("")
-        st.text("")
-        st.markdown("<h4 style='text-align: left; color: black;'>Lyrics</h4>", unsafe_allow_html=True)
-        st.write(row.Lyrics)
+        with col1:
+            st.markdown("<h4 style='text-align: left; color: black;'>Song Name</h4>", unsafe_allow_html=True)
+            st.write(row.Title)
 
-        # Meaning
-        st.text("")
-        st.text("")
-        st.markdown("<h4 style='text-align: left; color: black;'>Meaning</h4>", unsafe_allow_html=True)
-        st.write(row.Meaning)
-        st.caption("(Text generated from OpenAI's *GPT* API)")
+        with col2:
+            st.markdown("<h4 style='text-align: left; color: black;'>Artist</h4>", unsafe_allow_html=True)
+            st.write(row.Artist)
 
-        # Moods Summary
-        st.text("")
-        st.text("")
-        st.markdown("<h4 style='text-align: left; color: black;'>Moods Summary</h4>", unsafe_allow_html=True)
-        st.write(row.Moods_Description)
-        st.caption("(Text generated from OpenAI's *GPT* API)")
+        with col3:
+            st.markdown("<h4 style='text-align: left; color: black;'>Genre</h4>", unsafe_allow_html=True)
+            st.write(row.Genre)
 
-        # Emotions Description
-        st.text("")
-        st.text("")
-        st.markdown("<h4 style='text-align: left; color: black;'>Emotions Description</h4>", unsafe_allow_html=True)
-        st.write(row.Emotions_Description)
-        st.caption("(Text generated from OpenAI's *GPT* API)")
-        st.text("")
-        st.text("")
+        with col4:
+            st.markdown("<h4 style='text-align: left; color: black;'>Position in List</h4>", unsafe_allow_html=True)
+            st.write(row.Ranking)
 
-        df_moods = create_moods_df(row)
+        if row.Lyrics == 'Song does not contain lyrics':
+            # Display this if song doesn't contain lyrics
+            st.text("")
+            st.text("")
+            st.markdown("<h4 style='text-align: left; color: black;'>Lyrics</h4>", unsafe_allow_html=True)
+            st.write(row.Lyrics)
 
-        # List of Moods 
-        st.markdown("<h4 style='text-align: left; color: black;'>Moods List</h4>", unsafe_allow_html=True)
-        list_of_moods = row.Moods.replace(' ', ', ')
-        st.write(list_of_moods)
-        st.caption("(Text generated from OpenAI's *GPT* API)")
-        st.text("")
+            st.text("")
+            st.text("")
+            st.markdown("<h4 style='text-align: left; color: black;'>No Data Available</h4>", unsafe_allow_html=True)
+        elif row.Moods == 'No Data Available...':
+            # .. or this if No Data Available
+            st.markdown("<h4 style='text-align: left; color: black;'>No Data Available</h4>", unsafe_allow_html=True)
+        else:
+            # Lyrics
+            st.text("")
+            st.text("")
+            st.markdown("<h4 style='text-align: left; color: black;'>Lyrics</h4>", unsafe_allow_html=True)
+            st.write(row.Lyrics)
 
-        # Moods/VADS Table
-        st.markdown("<h4 style='text-align: left; color: black;'>VADs  (Valence, Arousal,Dominance)</h4>", unsafe_allow_html=True)
-        st.dataframe(df_moods, hide_index=True)
+            # Meaning
+            st.text("")
+            st.text("")
+            st.markdown("<h4 style='text-align: left; color: black;'>Meaning</h4>", unsafe_allow_html=True)
+            st.write(row.Meaning)
+            st.caption("(Text generated from OpenAI's *GPT* API)")
 
-         # VAD weighted average
-        st.markdown("<h5 style='text-align: left; color: black;'>VAD weighted average</h5>", unsafe_allow_html=True)
-        st.write(row.VAD_Centroid)
-        st.text("")
-        st.text("")
+            # Moods Summary
+            st.text("")
+            st.text("")
+            st.markdown("<h4 style='text-align: left; color: black;'>Moods Summary</h4>", unsafe_allow_html=True)
+            st.write(row.Moods_Description)
+            st.caption("(Text generated from OpenAI's *GPT* API)")
 
-        # Pitchfork Comments
-        st.markdown("<h4 style='text-align: left; color: black;'>Pitchfork Song Commentary</h4>", unsafe_allow_html=True)
-        st.write(row.Pitchfork_Comments)
+            # Emotions Description
+            st.text("")
+            st.text("")
+            st.markdown("<h4 style='text-align: left; color: black;'>Emotions Description</h4>", unsafe_allow_html=True)
+            st.write(row.Emotions_Description)
+            st.caption("(Text generated from OpenAI's *GPT* API)")
+            st.text("")
+            st.text("")
+
+            df_moods = create_moods_df(row)
+
+            # List of Moods 
+            st.markdown("<h4 style='text-align: left; color: black;'>Moods List</h4>", unsafe_allow_html=True)
+            list_of_moods = row.Moods.replace(' ', ', ')
+            st.write(list_of_moods)
+            st.caption("(Text generated from OpenAI's *GPT* API)")
+            st.text("")
+
+            # Moods/VADS Table
+            st.markdown("<h4 style='text-align: left; color: black;'>VADs  (Valence, Arousal,Dominance)</h4>", unsafe_allow_html=True)
+            st.dataframe(df_moods, hide_index=True)
+
+             # VAD weighted average
+            st.markdown("<h5 style='text-align: left; color: black;'>VAD weighted average</h5>", unsafe_allow_html=True)
+            st.write(row.VAD_Centroid)
+            st.text("")
+            st.text("")
+
+            # Pitchfork Comments
+            st.markdown("<h4 style='text-align: left; color: black;'>Pitchfork Song Commentary</h4>", unsafe_allow_html=True)
+            st.write(row.Pitchfork_Comments)
