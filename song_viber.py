@@ -213,7 +213,7 @@ st.sidebar.radio('LLM', ['GPT-3.5-Turbo', 'GPT-4'], key = 'llm')
 # Main area Layout
 
 st.markdown("<h1 style='text-align: center; color: black;'>SongViber</h1>", unsafe_allow_html=True)
-st.markdown("<h6 style='text-align: center; color: gray;'><i>powered by GPT</i></h6>", unsafe_allow_html=True)
+st.markdown("<h6 style='text-align: center; color: gray;'><i>by Sanford Baran</i></h6>", unsafe_allow_html=True)
 
 st.markdown("<h5 style='text-align: center; color: blue;'>PitchFork's Top 100 Songs for 2023</h5>", unsafe_allow_html=True)
 
